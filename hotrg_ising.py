@@ -103,6 +103,8 @@ def coarse_graining_step_2d(a,b,D='infinity'):
     AA = AA/maxAA #divides over largest value in the tensor
     if b != None:
         BA = BA/maxAA
+    else:
+        BA = AA
     
         
     return AA, BA, maxAA
@@ -142,6 +144,8 @@ def coarse_graining_step_3d(a,b=None,D='infinity'):
     AAAA = AAAA/maxAAAA #divides over largest value in the tensor
     if b != None:
         BAAA = BAAA/maxAAAA
+    else:
+        BAAA = AAAA
     
         
     return AAAA, BAAA, maxAAAA

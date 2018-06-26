@@ -1,10 +1,12 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 from hotrg_ising import *
+import scipy.integrate as integrate
 
-def compute_free_energy_temps(dim,Ds,h,temperatures):
+def compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=True):
 
     results = {}
+    error ={}
     
     for D in Ds:
         results[D] = []
@@ -12,7 +14,7 @@ def compute_free_energy_temps(dim,Ds,h,temperatures):
             print 'temp: %s' %(temp)
             beta = 1/temp
             a = isingtpf(dim,beta,h)
-            converg_criteria = 10**(-10)
+            converg_criteria = 10**(-6)
             
             i = 0
             Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
@@ -21,8 +23,8 @@ def compute_free_energy_temps(dim,Ds,h,temperatures):
             N = 1
     
             while True:
-                a, a, s, maxAA = coarse_graining_step(dim,a,a,D=D)
-                C = np.log(maxAA)+4*C
+                a, a, maxAA = coarse_graining_step(dim,a,D=D)
+                C = np.log(maxAA)+4*C #arreglar para 3D
                 N *= 4.
                 if i >= 10:
                     Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
@@ -35,18 +37,23 @@ def compute_free_energy_temps(dim,Ds,h,temperatures):
                     else:
                         f_i = f
                 i += 1
-            '''
-            for i in range(20):
-                b, a, s, maxAA = coarse_graining_step(b,a,D=D)
-                C *= maxAA
-                N += 4
-            '''
+                
             Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
             f = -temp*(np.log(Z)+4*C)/(4*N)
             
             results[D].append(f)
+        if dim == 2 and compute_error:
+            exact_sol = np.zeros(temperatures.size)
+            def funct_to_integrate(theta1,theta2,beta):
+                return np.log((np.cosh(2*beta))**2-np.sinh(2*beta)*(np.cos(theta1)+np.cos(theta2)))
+            for i in range(temperatures.size):
+                beta = 1/temperatures[i]
+                integ = integrate.dblquad(funct_to_integrate,0,np.pi,lambda x: 0, lambda x: np.pi,args=([beta]))[0]
+                exact_sol[i] = (-1/beta)*((np.log(2)+(1/(2*np.pi**2))*integ))
+                
+            error[D] = np.abs(exact_sol - results[D])/np.abs(exact_sol)            
             
-        return results
+    return results, error
 
 def compute_free_energy_hs(dim,Ds,hs,temp):
 
@@ -92,6 +99,25 @@ def compute_free_energy_hs(dim,Ds,hs,temp):
             results[D].append(f)
             
         return results
+    
+def compute_internal_energy_and_heatc(dim,Ds,h,temperatures):
+    f, e = compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=False)
+#    for D in Ds:
+#        plt.plot(temperatures,f[D],label=str(D))
+#    plt.axvline(x=2.269185,linestyle='--')
+#    plt.legend()
+#    plt.show()
+    u = {}
+    c = {}
+    delta_temp = temperatures[1]-temperatures[0]
+    for D in Ds:
+        fot = f[D]/temperatures
+        fot_dif = (fot[1:] - fot[:-1])/delta_temp
+        u[D] = (-temperatures[1:]**2)*fot_dif        
+        c[D] = (u[D][1:]-u[D][:-1])/delta_temp
+    
+    return u, c
+
 '''
 temp = 0.5
 hs = np.linspace(-1,1,50)
@@ -159,46 +185,79 @@ plt.axhline(y=0,linestyle='--')
 plt.legend()
 plt.show()
 '''
+h = 10**-10
+temperatures = np.linspace(0.1,3.5,100)
+Ds = [2,4,6,8,10]
+
+#results, error = compute_free_energy_temps(2,Ds,h,temperatures)
+
+#for D in Ds:
+#	plt.semilogy(temperatures[50:85],np.abs(error[D][50:85]),label=str(D))	
+#plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+#plt.xlabel('Temperature')
+#plt.ylabel('Error')
+#plt.legend()
+#plt.savefig('freeenergy2derror.png')
+#plt.show()
+
+#for D in Ds:
+#	plt.plot(temperatures,results[D],label=str(D))	
+#plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+##plt.axvline(x=4.5,linestyle='--',color='grey')
+#plt.xlabel('Temperature')
+#plt.ylabel('Free energy per site')
+#plt.legend()
+#plt.savefig('freeenergy2d.png')
+#plt.show()
+
+#h = 10**-10
+#temperatures = np.linspace(0.6,3.5,7000)
+#Ds = [2,4,6,8,10]
+#us, cs = compute_internal_energy_and_heatc(dim,Ds,h,temperatures)
+#for D in Ds:
+#	plt.plot(temperatures,us[D],label=str(D))	
+#plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+##plt.axvline(x=4.5,linestyle='--',color='grey')
+#plt.xlabel('Temperature')
+#plt.ylabel('Internal Energy')
+#plt.legend()
+#plt.savefig('freeenergy2d.png')
+#plt.show()
 
 
-'''
-#Susceptibility:
-h = 10**-8
-temperatures = np.linspace(0.1,4.0,50)
-Ds = [5]
-delta_h = 10**(-7)
   
-results = compute_free_energy(Ds,h,temperatures)
-resultsplus = compute_free_energy(Ds,h+delta_h,temperatures)
-resultsminus = compute_free_energy(Ds,h-delta_h,temperatures)
+#results = compute_free_energy_temps(Ds,h,temperatures)
+#resultsplus = compute_free_energy_temps(Ds,h+delta_h,temperatures)
 
-susc = {}
-for D in Ds:
-    susc[D] = np.array(resultsplus[D]) - 2*np.array(results[D]) + np.array(resultsminus[D])
-    susc[D] = susc[D]/(delta_h)**2
+#mag = {}
+#for D in Ds:
+#    mag[D] = np.array(resultsplus[D]) - np.array(results[D])
+#    mag[D] = mag[D]/(delta_h)**2
+
+
+
+
+
+h = 10**-10
+temperatures = np.linspace(0.6,3.5,7000)
+Ds = [2,4,6,10]
+
+us, cs = compute_internal_energy_and_heatc(2,Ds,h,temperatures)
 
 for D in Ds:
-    plt.plot(temperatures,susc[D],label=str(D))
+    plt.plot(temperatures[1:],us[D],label=str(D))
 plt.axvline(x=2.269185,linestyle='--')
+plt.xlabel('Temperature')
+plt.ylabel('Internal energy per site')
 plt.legend()
+plt.savefig('internalenergy2d.png')
 plt.show()
-'''
-
-h = 10**-8
-temperatures = np.linspace(0.1,4.0,50)
-Ds = [6]
-delta_h = 10**(-8)/4
-  
-results = compute_free_energy_temps(Ds,h,temperatures)
-resultsplus = compute_free_energy_temps(Ds,h+delta_h,temperatures)
-
-mag = {}
-for D in Ds:
-    mag[D] = np.array(resultsplus[D]) - np.array(results[D])
-    mag[D] = mag[D]/(delta_h)**2
 
 for D in Ds:
-    plt.plot(temperatures,mag[D],label=str(D))
+    plt.plot(temperatures[2:],cs[D],label=str(D))
 plt.axvline(x=2.269185,linestyle='--')
+plt.xlabel('Temperature')
+plt.ylabel('Heat capacity')
 plt.legend()
+plt.savefig('heatcapacity2d.png')
 plt.show()

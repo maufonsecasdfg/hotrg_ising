@@ -59,29 +59,25 @@ def compute_magnetization_hs(dim,Ds,hs,temp):
             print 'h: %s' %(h)
             a = isingtpf(dim,beta,h)
             b = isings(dim,beta,h)
-            converg_criteria = 10**(-10)
+            cconverg_criteria = 10**(-6)
             
             i = 0
-            s_i = np.eye(D)
             r_i = 2
             while True:
                 a, b, maxAA = coarse_graining_step(dim,a,b=b,D=D)
                 if i >= 10:
-                    ap = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
-                    bp = ncon([b,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+                    ap, bp = final_contraction(dim,a,b)
             
                     r = (bp/ap)
                     delta_r = np.abs((r - r_i)/r)
-                    if np.max(delta_r) <= converg_criteria or i >= 2000:
+                    if delta_r <= converg_criteria:
                         print i
                         break
                     else:
-                        s_i = s
                         r_i = r
                 i += 1
     
-            ap = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
-            bp = ncon([b,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+            ap, bp = final_contraction(dim,a,b)
             
             results[D].append(bp/ap)
             
@@ -115,11 +111,11 @@ def write_results(results,xaxis,docu_name):
 	
 
 
-h = 10**(-10)
-temperatures = np.linspace(0.1,5.5,100)
-Ds = [3]
-
-results3, error = compute_magnetization_temps(3,Ds,h,temperatures)
+#h = 10**(-10)
+#temperatures = np.linspace(0.1,3.5,100)
+#Ds = [3]
+#
+#results3, error = compute_magnetization_temps(3,Ds,h,temperatures)
 #write_results(results,temperatures,'magnetization2d')
 #write_results(error,temperatures,'magnetization2d_errors')
 
@@ -136,15 +132,15 @@ results3, error = compute_magnetization_temps(3,Ds,h,temperatures)
 #plt.savefig('magnetization2derrorcomplete.png')
 #plt.show()
 #
-for D in Ds:
-	plt.plot(temperatures,results3[D],label=str(D))	
-#plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
-plt.axvline(x=4.5,linestyle='--',color='grey')
-plt.xlabel('Temperature')
-plt.ylabel('Magnetization per site')
-plt.legend()
-#plt.savefig('magnetization2d.png')
-plt.show()
+#for D in Ds:
+#	plt.plot(temperatures,results3[D],label=str(D))	
+##plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+#plt.axvline(x=4.5,linestyle='--',color='grey')
+#plt.xlabel('Temperature')
+#plt.ylabel('Magnetization per site')
+#plt.legend()
+##plt.savefig('magnetization2d.png')
+#plt.show()
 
 
 #h = 10**(-10)
@@ -165,19 +161,20 @@ plt.show()
 #plt.show()
 
 
-'''
 
-h = 10**-8
-temperatures = np.linspace(0.1,4.0,50)
-Ds = [10]
 
-susc = compute_susceptibility(Ds,h,temperatures)
-
+h = 10**(-10)
+temperatures = np.linspace(0.1,3.5,100)
+Ds = [2,4,6,8,10]
+susc = compute_susceptibility(2,Ds,h,temperatures)
 
 for D in Ds:
     plt.plot(temperatures,susc[D],label=str(D))
-plt.axvline(x=2.269185,linestyle='--')
+plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+plt.xlabel('Temperature')
+plt.ylabel('Magnetic Susceptibility')
 plt.legend()
+plt.savefig('susc2d.png')
 plt.show()
-'''
+
 
