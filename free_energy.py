@@ -15,20 +15,24 @@ def compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=True):
             beta = 1/temp
             a = isingtpf(dim,beta,h)
             converg_criteria = 10**(-6)
+            if dim == 2:
+                Nplus = 4.
+            elif dim == 3:
+                Nplus = 6.
             
             i = 0
             Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
-            f_i = -temp*(np.log(Z))/(4)
+            f_i = -temp*(np.log(Z))/(Nplus)
             C = 0
             N = 1
     
             while True:
                 a, a, maxAA = coarse_graining_step(dim,a,D=D)
-                C = np.log(maxAA)+4*C #arreglar para 3D
-                N *= 4.
+                C = np.log(maxAA)+Nplus*C #arreglar para 3D
+                N *= Nplus.
                 if i >= 10:
                     Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
-                    f = -temp*(np.log(Z)+4*C)/(4*N)
+                    f = -temp*(np.log(Z)+Nplus*C)/(Nplus*N)
                     delta_f = np.abs((f - f_i)/f)
                     #print delta_f
                     if delta_f <= converg_criteria:
@@ -240,22 +244,30 @@ Ds = [2,4,6,8,10]
 
 h = 10**-10
 temperatures = np.linspace(0.6,3.5,7000)
-Ds = [2,4,6,10]
+Ds = [2,4]
 
-us, cs = compute_internal_energy_and_heatc(2,Ds,h,temperatures)
+#us, cs = compute_internal_energy_and_heatc(2,Ds,h,temperatures)
 
+#for D in Ds:
+#    plt.plot(temperatures[1:],us[D],label=str(D))
+#plt.axvline(x=2.269185,linestyle='--')
+#plt.xlabel('Temperature')
+#plt.ylabel('Internal energy per site')
+#plt.legend()
+#plt.savefig('internalenergy2d.png')
+#plt.show()
+
+cs2 = {}
 for D in Ds:
-    plt.plot(temperatures[1:],us[D],label=str(D))
+    cs2[D] = np.zeros(temperatures[2:].size)
+    for i in range(cs[D].size):
+        if cs[D][i] > 5 or cs[D][i] < 0:
+            cs2[D][i] = None
+        else:
+            cs2[D][i] = cs[D][i]
+    plt.plot(temperatures[2:],cs2[D],label=str(D))
 plt.axvline(x=2.269185,linestyle='--')
-plt.xlabel('Temperature')
-plt.ylabel('Internal energy per site')
-plt.legend()
-plt.savefig('internalenergy2d.png')
-plt.show()
-
-for D in Ds:
-    plt.plot(temperatures[2:],cs[D],label=str(D))
-plt.axvline(x=2.269185,linestyle='--')
+#plt.ylim(-1,5)
 plt.xlabel('Temperature')
 plt.ylabel('Heat capacity')
 plt.legend()

@@ -111,15 +111,11 @@ def write_results(results,xaxis,docu_name):
 	
 
 
-#h = 10**(-10)
-#temperatures = np.linspace(0.1,3.5,100)
-#Ds = [3]
-#
-#results3, error = compute_magnetization_temps(3,Ds,h,temperatures)
-#write_results(results,temperatures,'magnetization2d')
-#write_results(error,temperatures,'magnetization2d_errors')
+h = 10**(-10)
+temperatures = np.linspace(0.7,5.5,100)
+Ds = [2,3,4]
 
-#results, error = compute_magnetization_temps(2,Ds,h,temperatures)
+results, error = compute_magnetization_temps(3,Ds,h,temperatures)
 #write_results(results,temperatures,'magnetization2d')
 #write_results(error,temperatures,'magnetization2d_errors')
 
@@ -131,16 +127,16 @@ def write_results(results,xaxis,docu_name):
 #plt.legend()
 #plt.savefig('magnetization2derrorcomplete.png')
 #plt.show()
-#
-#for D in Ds:
-#	plt.plot(temperatures,results3[D],label=str(D))	
-##plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
-#plt.axvline(x=4.5,linestyle='--',color='grey')
-#plt.xlabel('Temperature')
-#plt.ylabel('Magnetization per site')
-#plt.legend()
-##plt.savefig('magnetization2d.png')
-#plt.show()
+
+for D in Ds:
+	plt.plot(temperatures,results3[D],label=str(D))	
+#plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+plt.axvline(x=4.511544,linestyle='--',color='grey')
+plt.xlabel('Temperature')
+plt.ylabel('Magnetization per site')
+plt.legend()
+plt.savefig('magnetization3d.png')
+plt.show()
 
 
 #h = 10**(-10)
@@ -162,19 +158,19 @@ def write_results(results,xaxis,docu_name):
 
 
 
-
-h = 10**(-10)
-temperatures = np.linspace(0.1,3.5,100)
-Ds = [2,4,6,8,10]
-susc = compute_susceptibility(2,Ds,h,temperatures)
-
-for D in Ds:
-    plt.plot(temperatures,susc[D],label=str(D))
-plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
-plt.xlabel('Temperature')
-plt.ylabel('Magnetic Susceptibility')
-plt.legend()
-plt.savefig('susc2d.png')
-plt.show()
+#
+#h = 10**(-10)
+#temperatures = np.linspace(0.1,3.5,100)
+#Ds = [2,3,4]
+##susc = compute_susceptibility(2,Ds,h,temperatures)
+#
+#for D in Ds:
+#    plt.plot(temperatures,susc[D],label=str(D))
+##plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+#plt.xlabel('Temperature')
+#plt.ylabel('Magnetic Susceptibility')
+#plt.legend()
+#plt.savefig('susc2d.png')
+#plt.show()
 
 
