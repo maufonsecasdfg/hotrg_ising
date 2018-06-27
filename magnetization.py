@@ -115,7 +115,7 @@ h = 10**(-10)
 temperatures = np.linspace(0.7,5.5,100)
 Ds = [2,3,4]
 
-results, error = compute_magnetization_temps(3,Ds,h,temperatures)
+#results, error = compute_magnetization_temps(3,Ds,h,temperatures)
 #write_results(results,temperatures,'magnetization2d')
 #write_results(error,temperatures,'magnetization2d_errors')
 
@@ -129,7 +129,7 @@ results, error = compute_magnetization_temps(3,Ds,h,temperatures)
 #plt.show()
 
 for D in Ds:
-	plt.plot(temperatures,results3[D],label=str(D))	
+	plt.plot(temperatures,results[D],label=str(D))	
 #plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
 plt.axvline(x=4.511544,linestyle='--',color='grey')
 plt.xlabel('Temperature')

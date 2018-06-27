@@ -37,6 +37,7 @@ def isings2d(beta,h):
     
     return b
 
+
 def isingtpf3d(beta,h):
     H_local = np.array([[-1.-h/2,1.],[1.,-1.+h/2]]) #h is intended to be a small magnetic field to break symmetry
     Q = np.exp(-beta*H_local)
@@ -77,12 +78,11 @@ def isings(dim,beta,h):
         return isings2d(beta,h)
     elif dim == 3:
         return isings3d(beta,h)
-        
 
 #coarse-grain a sub-network with the form
 # b - a
 # a - a
-def coarse_graining_step_2d(a,b,D='infinity'):
+def coarse_graining_step_2d(a,b=None,D='infinity'):
     
     A = ncon([a,a],[[-2,-3,-4,1],[-1,1,-5,-6]])
     U, s, V = tensorsvd(A,[0,1],[2,3,4,5],D) 
@@ -165,5 +165,7 @@ def final_contraction(dim,a,b=None):
         ap = ncon([a,a,a,a,a,a,a,a],[[1,2,4,5,6,3],[4,7,1,8,9,10],[11,12,13,14,3,6],[13,15,11,16,10,9],[20,14,19,12,17,18],[19,16,20,15,22,21],[24,5,23,2,18,17],[23,8,24,7,21,22]])
         if b != None:
             bp = ncon([b,a,a,a,a,a,a,a],[[1,2,4,5,6,3],[4,7,1,8,9,10],[11,12,13,14,3,6],[13,15,11,16,10,9],[20,14,19,12,17,18],[19,16,20,15,22,21],[24,5,23,2,18,17],[23,8,24,7,21,22]])
+    if b == None:
+        bp = None
     return ap, bp
     

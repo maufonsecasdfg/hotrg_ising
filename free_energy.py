@@ -21,7 +21,8 @@ def compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=True):
                 Nplus = 6.
             
             i = 0
-            Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+            #Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+            Z = final_contraction(dim,a)[0]
             f_i = -temp*(np.log(Z))/(Nplus)
             C = 0
             N = 1
@@ -29,9 +30,10 @@ def compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=True):
             while True:
                 a, a, maxAA = coarse_graining_step(dim,a,D=D)
                 C = np.log(maxAA)+Nplus*C #arreglar para 3D
-                N *= Nplus.
+                N *= Nplus
                 if i >= 10:
-                    Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+                    #Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+                    Z = final_contraction(dim,a)[0]
                     f = -temp*(np.log(Z)+Nplus*C)/(Nplus*N)
                     delta_f = np.abs((f - f_i)/f)
                     #print delta_f
@@ -42,7 +44,8 @@ def compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=True):
                         f_i = f
                 i += 1
                 
-            Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+            #Z = ncon([a,a,a,a],[[7,5,3,1],[3,6,7,2],[8,1,4,5],[4,2,8,6]])
+            Z = final_contraction(dim,a)[0]
             f = -temp*(np.log(Z)+4*C)/(4*N)
             
             results[D].append(f)
@@ -104,8 +107,11 @@ def compute_free_energy_hs(dim,Ds,hs,temp):
             
         return results
     
-def compute_internal_energy_and_heatc(dim,Ds,h,temperatures):
-    f, e = compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=False)
+def compute_internal_energy_and_heatc(dim,Ds,h,temperatures,results=False):
+    if results == False:
+        f, e = compute_free_energy_temps(dim,Ds,h,temperatures,compute_error=False)
+    else:
+        f = results
 #    for D in Ds:
 #        plt.plot(temperatures,f[D],label=str(D))
 #    plt.axvline(x=2.269185,linestyle='--')
@@ -189,29 +195,29 @@ plt.axhline(y=0,linestyle='--')
 plt.legend()
 plt.show()
 '''
-h = 10**-10
-temperatures = np.linspace(0.1,3.5,100)
-Ds = [2,4,6,8,10]
-
-#results, error = compute_free_energy_temps(2,Ds,h,temperatures)
-
-#for D in Ds:
-#	plt.semilogy(temperatures[50:85],np.abs(error[D][50:85]),label=str(D))	
-#plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
-#plt.xlabel('Temperature')
-#plt.ylabel('Error')
-#plt.legend()
-#plt.savefig('freeenergy2derror.png')
-#plt.show()
-
+#h = 10**-10
+#temperatures = np.linspace(0.7,5.5,100)
+#Ds = [2,3,4]
+#
+##results, error = compute_free_energy_temps(3,Ds,h,temperatures)
+#
+##for D in Ds:
+##	plt.semilogy(temperatures[50:85],np.abs(error[D][50:85]),label=str(D))	
+##plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
+##plt.xlabel('Temperature')
+##plt.ylabel('Error')
+##plt.legend()
+##plt.savefig('freeenergy2derror.png')
+##plt.show()
+#
 #for D in Ds:
 #	plt.plot(temperatures,results[D],label=str(D))	
-#plt.axvline(x=2./np.log(1+np.sqrt(2)),linestyle='--',color='grey')
-##plt.axvline(x=4.5,linestyle='--',color='grey')
+#
+#plt.axvline(x=4.511544,linestyle='--',color='grey')
 #plt.xlabel('Temperature')
 #plt.ylabel('Free energy per site')
 #plt.legend()
-#plt.savefig('freeenergy2d.png')
+#plt.savefig('freeenergy3d.png')
 #plt.show()
 
 #h = 10**-10
@@ -243,33 +249,26 @@ Ds = [2,4,6,8,10]
 
 
 h = 10**-10
-temperatures = np.linspace(0.6,3.5,7000)
-Ds = [2,4]
+temperatures = np.linspace(0.7,5.5,500)
+Ds = [2,3]
 
-#us, cs = compute_internal_energy_and_heatc(2,Ds,h,temperatures)
+us, cs = compute_internal_energy_and_heatc(3,Ds,h,temperatures)
 
-#for D in Ds:
-#    plt.plot(temperatures[1:],us[D],label=str(D))
-#plt.axvline(x=2.269185,linestyle='--')
-#plt.xlabel('Temperature')
-#plt.ylabel('Internal energy per site')
-#plt.legend()
-#plt.savefig('internalenergy2d.png')
-#plt.show()
-
-cs2 = {}
 for D in Ds:
-    cs2[D] = np.zeros(temperatures[2:].size)
-    for i in range(cs[D].size):
-        if cs[D][i] > 5 or cs[D][i] < 0:
-            cs2[D][i] = None
-        else:
-            cs2[D][i] = cs[D][i]
-    plt.plot(temperatures[2:],cs2[D],label=str(D))
-plt.axvline(x=2.269185,linestyle='--')
-#plt.ylim(-1,5)
+    plt.plot(temperatures[1:],us[D],label=str(D))
+plt.axvline(x=4.511544,linestyle='--')
+plt.xlabel('Temperature')
+plt.ylabel('Internal energy per site')
+plt.legend()
+plt.savefig('internalenergy3d.png')
+plt.show()
+
+
+for D in Ds:
+    plt.plot(temperatures[2:],cs[D],label=str(D))
+plt.axvline(x=4.511544,linestyle='--')
 plt.xlabel('Temperature')
 plt.ylabel('Heat capacity')
 plt.legend()
-plt.savefig('heatcapacity2d.png')
+plt.savefig('heatcapacity3d.png')
 plt.show()
